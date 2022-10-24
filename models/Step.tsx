@@ -1,11 +1,5 @@
 import mongoose from 'mongoose';
 
-const contentSchema = new mongoose.Schema({
-    time: Number,
-    blocks: Array,
-    version: String
-});
-
 const stepSchema = new mongoose.Schema({
     // title: {
     //     type: String,
@@ -14,11 +8,11 @@ const stepSchema = new mongoose.Schema({
     //     trim: true
     // },
     content: {
-        type: contentSchema
+        type: String
     },
-    index: {
-        type: Number
-    }
+    // index: {
+    //     type: Number
+    // }
 });
 
 stepSchema.set('timestamps', true);

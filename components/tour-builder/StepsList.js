@@ -3,6 +3,7 @@ import NewStepThumbnail from "./NewStepThumbnail";
 import StepThumbnail from "./StepThumbnail";;
 
 function StepsList({steps, clickEditStep, createStep}) {
+
 	return (
 		<React.Fragment>
 				<div

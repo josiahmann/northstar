@@ -1,55 +1,72 @@
+import "quill/dist/quill.bubble.css";
 import ModalStep from "./ModalStep";
 import apiClient from "../../utils/http-common";
-import React from "react";
-import dynamic from 'next/dynamic'
+import React, { useState } from "react";
+import dynamic from "next/dynamic";
 
-const EditorJs = dynamic(
-  () => import('@natterstefan/react-editor-js'),
-  { ssr: false }
-)
+const QuillNoSSRWrapper = dynamic(import("react-quill"), {
+	ssr: false,
+	loading: () => <p>Loading ...</p>,
+});
+
+const modules = {
+    clipboard: {
+        matchVisual: true,
+    },
+	toolbar: [
+		[{ size: [] }],
+		["bold", "italic", "underline", "strike", "blockquote"],
+		[
+			{ list: "ordered" },
+			{ list: "bullet" },
+			{ indent: "-1" },
+			{ indent: "+1" },
+		],
+		["link", "image", "video"],
+	],
+	clipboard: {
+		// toggle to add extra line breaks when pasting HTML:
+		matchVisual: false,
+	},
+};
 
 function EditStep({ _id, title, content, onClose, fetchSteps }) {
-	let editor = null;
-	
+	const [stepContent, setStepContent] = useState(content);
+
 	const onSave = async () => {
 		try {
-			const outputData = await editor.save();
-            if(!_id){
-                return apiClient.post('/steps', {
-                    title: title,
-                    content: outputData
-                })
-            }
-            //
+			if (!_id) {
+				return apiClient.post("/steps", {
+					// title: title,
+					content: stepContent,
+				});
+			}
+			//
 			return apiClient.patch(`/steps/${_id}`, {
-                content: outputData
-            })
+				content: stepContent,
+			});
 		} catch (e) {
 			console.log("Saving failed: ", e);
 		}
 	};
 
-	const onReady = () => {
-		editor.focus();
-	};
-
-    function handleSave(){
-        onSave().then(() => {
-            fetchSteps();
-            onClose();
-        });
-    }
+	function handleSave() {
+		onSave().then(() => {
+			fetchSteps();
+			onClose();
+		});
+	}
 
 	return (
-            <ModalStep onSave={handleSave} onClose={onClose} title={title}>
-                <EditorJs
-                    onReady={onReady}
-                    data={content}
-                    editorInstance={(editorInstance) => {
-                        editor = editorInstance;
-                    }}
-                />
-            </ModalStep>
+		<ModalStep onSave={handleSave} onClose={onClose} title={title}>
+			<QuillNoSSRWrapper
+                preserveWhitespace
+				modules={modules}
+				theme="bubble"
+				value={stepContent}
+				onChange={setStepContent}
+			/>
+		</ModalStep>
 	);
 }
 export default EditStep;

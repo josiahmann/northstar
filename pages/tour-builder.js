@@ -1,4 +1,4 @@
-import TourBuilder from "../components/tour-builder/App";
+import TourBuilder from "../components/tour-builder/TourBuilderApp";
 import { QueryClient, QueryClientProvider } from "react-query";
 
 const queryClient = new QueryClient();

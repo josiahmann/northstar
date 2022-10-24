@@ -22,9 +22,8 @@ export default async (req, res) => {
 			break;
 		case "DELETE":
 			try {
-				console.log('im in the [id].js file');
-				const step = await Step.find(id);
-				await Step.deleteOne(step);
+				console.log('DELETE by id: ', id);
+				const step = await Step.deleteOne({ _id: id });
 				res.status(201).json({ success: true, data: step });
 			} catch (error) {
 				res.status(400).json({ success: false });

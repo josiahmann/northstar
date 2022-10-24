@@ -6,7 +6,7 @@ import { useQuery } from "react-query";
 import { Spinner, Error } from "../../utils/utilityComponents";
 import TourFooter from "./TourFooter";
 
-function App() {
+function TourBuilderApp() {
 	const [editing, setEditing] = useState(false);
 	const [currentStep, setStep] = useState(null);
 	const [isTourActive, setTourActive] = useState(false);
@@ -21,12 +21,13 @@ function App() {
     }
 
 	function handleEditStep(step) {
-		setStep({ ...step });
+		setStep({...step });
 		setEditing(true);
 	}
 
 	function stopEditing() {
 		setEditing(false);
+		setStep(null);
 	}
 
 	function saveAndClose() {
@@ -89,4 +90,4 @@ function App() {
 	);
 }
 
-export default App;
+export default TourBuilderApp;

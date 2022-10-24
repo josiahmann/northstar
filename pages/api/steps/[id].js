@@ -11,7 +11,7 @@ export default async (req, res) => {
 	switch (method) {
         case "PATCH":
 			try {
-				const step = await Step.findByIdAndUpdate(id, req.body, { 
+				const step = await Step.findByIdAndUpdate(id, JSON.parse(req.body), { 
                     new: true,
                     runValidators: true
                 });

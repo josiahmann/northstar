@@ -111,4 +111,5 @@ function Guides() {
 		</React.Fragment>
 	);
 }
+Guides.layout = "admin";
 export default Guides;

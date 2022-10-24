@@ -1,11 +1,14 @@
-import '../styles/globals.css'
-import '../styles/index.css'
-import Layout from '../components/layout'
+import AdminLayout from "../components/layouts/admin-layout";
+import "../styles/globals.css";
+import "../styles/index.css";
 
-export default function MyApp({ Component, pageProps }) {
-  return (
-    <Layout>
-      <Component {...pageProps} />
-    </Layout>
-  )
+export default function App({ Component, pageProps }) {
+	if (Component.layout === "admin") {
+		return (
+			<AdminLayout>
+				<Component {...pageProps} />
+			</AdminLayout>
+		);
+	}
+	return <Component {...pageProps} />;
 }

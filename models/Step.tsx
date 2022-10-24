@@ -1,18 +1,23 @@
 import mongoose from 'mongoose';
 
+const contentSchema = new mongoose.Schema({
+    time: Number,
+    blocks: Array,
+    version: String
+});
+
 const stepSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        // required: [true, 'Please enter a title'],
-        maxLength: 100,
-        trim: true
-    },
+    // title: {
+    //     type: String,
+    //     // required: [true, 'Please enter a title'],
+    //     maxLength: 100,
+    //     trim: true
+    // },
     content: {
-        type: Object
+        type: contentSchema
     },
     index: {
-        type: Number,
-        unique: true,
+        type: Number
     }
 });
 

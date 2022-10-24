@@ -5,7 +5,6 @@ dbConnect();
 
 export default async (req, res) => {
 	const { method } = req;
-    console.log('im in the index.js file');
 
 	switch (method) {
 		case "GET":
@@ -19,14 +18,14 @@ export default async (req, res) => {
 			}
 			break;
 		case "POST":
-            console.log('im in the POST METHOD');
             try {
 				const step = await Step.create(
-					req.body
+					JSON.parse(req.body)
 				); /* create a new model in the database */
 				res.status(201).json({ success: true, data: step });
 			} catch (error) {
-				res.status(400).json({ success: false });
+                console.log(error.message)
+				res.status(400).json({ success: false, message: error.message });
 			}
 			break;
 		default:

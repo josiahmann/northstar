@@ -1,5 +1,12 @@
-import mongoose from 'mongoose';
-
+import mongoose, { Mongoose } from 'mongoose';
+const DocumentSchema = new mongoose.Schema({
+    children :{
+        type: [mongoose.Schema.Types.Mixed]
+    },
+    text: {
+        type: String
+    }
+});
 const stepSchema = new mongoose.Schema({
     // title: {
     //     type: String,
@@ -8,7 +15,7 @@ const stepSchema = new mongoose.Schema({
     //     trim: true
     // },
     content: {
-        type: String
+        type: [DocumentSchema]
     },
     // index: {
     //     type: Number

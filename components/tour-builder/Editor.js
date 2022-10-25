@@ -7,23 +7,7 @@ const QuillNoSSRWrapper = dynamic(import("react-quill"), {
 	loading: () => <p>Loading ...</p>,
 });
 
-const modules = {
-    toolbar: [
-      [{ size: [] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [
-        { list: 'ordered' },
-        { list: 'bullet' },
-        { indent: '-1' },
-        { indent: '+1' },
-      ],
-      ['link', 'image', 'video'],
-    ],
-    clipboard: {
-      // toggle to add extra line breaks when pasting HTML:
-      matchVisual: false,
-    },
-  }
+
 class Editor extends React.Component {
     constructor(props){
         super(props)
@@ -36,7 +20,7 @@ class Editor extends React.Component {
 
     onChange(value){
         this.setState({content: value})
-        console.log('ran', value)
+        
     }
     
     render(){

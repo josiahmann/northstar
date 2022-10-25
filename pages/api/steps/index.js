@@ -19,7 +19,8 @@ export default async (req, res) => {
 			break;
 		case "POST":
             try {
-				const step = await Step.create(req.body); /* create a new model in the database */
+                console.log('POST: ', req.body);
+				const step = await Step.create(JSON.parse(req.body)); /* create a new model in the database */
 				res.status(201).json({ success: true, data: step });
 			} catch (error) {
                 console.log(error.message)

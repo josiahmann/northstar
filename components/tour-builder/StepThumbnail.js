@@ -1,16 +1,20 @@
+import serializeNodes from '../../utils/parseHTML';
+
 function StepThumbnail({ id, editStep, content }) {
 	return (
 		<div
-			className="bg-gray-300 rounded-lg mr-2 relative"
+			className="bg-white border rounded-lg mr-2 relative"
 			style={{
 				width: "300px",
 				height: "200px",
 			}}
-            onClick={() => editStep(id)}
+			onClick={() => editStep(id)}
 		>
 			{content && (
-				<div className="bg-white p-3 border inset-0 flex items-center justify-center">
-                    <div dangerouslySetInnerHTML={{__html: content}} ></div>
+				<div className="p-3 inset-0 flex items-center justify-center">
+					<div dangerouslySetInnerHTML={{ __html: serializeNodes(content) }}>
+
+                    </div>
 					{/* <button className="bg-white text-gray-500 rounded-full p-2" onClick={editStep}>
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

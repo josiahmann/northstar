@@ -5,6 +5,6 @@ module.exports = {
 	reactStrictMode: true,
 	env: {
 		MONGODB_URI:
-			"mongodb+srv://josiahmann:olo9Gg6dev8I0bQD@cluster0.wgrwciv.mongodb.net/?retryWrites=true&w=majority",
+			this.env.MONGODB_URI || "mongodb://localhost:27017/tour-builder",
 	},
 };

@@ -25,7 +25,7 @@ function EditStep({ _id, title, content, onClose, fetchSteps }) {
 				return apiClient.post("/steps", {
 					// title: title,
 					content: editor.children,
-				});
+            });
 			}
 			//
 			return apiClient.patch(`/steps/${_id}`, {

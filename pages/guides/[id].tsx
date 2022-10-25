@@ -1,9 +1,8 @@
-import axios from "axios";
-import { GetStaticPaths, GetStaticProps } from "next";
 import AdminLayout from "../../components/layouts/admin-layout";
 import MainLayout from "../../components/mainLayout";
 import { Guide } from "../../models/Guide";
 import { Spinner } from "../../utils/utilityComponents";
+import getStaticResourcePaths from "../../utils/getStaticResourcePaths";
 
 async function getData() {
 	let response = await fetch('/api/guides')
@@ -42,36 +41,32 @@ function Guide({ guide, hasError }) {
 	);
 }
 
-export const getStaticProps: GetStaticProps = async (context) => {
-	const itemID = context.params?.id;
-	const data = await getData();
-	const foundItem = data.find((item: Guide) => itemID === item.id);
 
-	if (!foundItem) {
-		return {
-			props: { hasError: true },
-		};
-	}
 
-	return {
-		props: {
-			guide: foundItem,
-		},
-	};
-};
 
-export const getStaticPaths: GetStaticPaths = async () => {
-	const data = await getData();
-	const pathsWithParams = data.map((guide: Guide) => {
-		return {
-			params: { something: guide.id },
-		};
-	});
+export const getStaticPaths = async () => {
+    const paths = await getStaticResourcePaths('guides');
+    return paths;
+}
 
-	return {
-		paths: pathsWithParams,
-		fallback: true,
-	};
-};
+
+
+export const getStaticProps = async (context) => {
+    const guideId = context.params.id;    // Your dynamic page is [id].js
+    const server = "http://localhost:3000";
+
+    // const res = await fetch(`${server}/api/entries/allStories/${id}`);
+    // trying to get the params._id from each story 
+    // single api call (here)
+    const res = await fetch(`${server}/api/guides`)
+        .then(res => res.json())
+        .then(data => data.data);
+    // removing const { data } because the data will be returned when calling res.json()
+    // instead of the calling the single api (just a fix not recommended to access [0] directly )
+    return {
+        props: { guide: res.filter(guide => guide._id === guideId)[0] }
+    }
+}
+
 
 export default Guide;

@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from 'mongoose';
+import mongoose from 'mongoose';
 const DocumentSchema = new mongoose.Schema({
     children :{
         type: [mongoose.Schema.Types.Mixed],

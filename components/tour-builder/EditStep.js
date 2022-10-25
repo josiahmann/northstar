@@ -17,12 +17,9 @@ function EditStep({ _id, title, content, onClose, fetchSteps }) {
         },
     ]
 
-    function handleChange(value) {
-        console.log(value)
-        console.log('here')
-    }
 
 	const onSave = async () => {
+        console.log(editor)
 		try {
 			if (!_id) {
 				return apiClient.post("/steps", {
@@ -48,7 +45,7 @@ function EditStep({ _id, title, content, onClose, fetchSteps }) {
 
 	return (
 		<ModalStep onSave={handleSave} onClose={onClose} title={title}>
-            <EditorComponent editor={editor} emitValue={handleChange} initialValue={initialValue}></EditorComponent>
+            <EditorComponent editor={editor} initialValue={initialValue}></EditorComponent>
 		</ModalStep>
 	);
 }

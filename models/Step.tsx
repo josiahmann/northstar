@@ -1,7 +1,7 @@
 import mongoose, { Mongoose } from 'mongoose';
 const DocumentSchema = new mongoose.Schema({
     children :{
-        type: [mongoose.Schema.Types.Mixed]
+        type: [mongoose.Schema.Types.Mixed],
     },
     text: {
         type: String

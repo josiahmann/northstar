@@ -1,150 +1,292 @@
-import React, { useRef, useEffect, PropsWithChildren, Ref } from 'react'
-import ReactDOM from 'react-dom'
-import { Slate, Editable, useSlate, useFocused } from 'slate-react'
+import React, { useCallback, useEffect, useMemo } from "react";
+import ReactDOM from "react-dom";
+import isHotkey from "is-hotkey";
+import { Editable, withReact, useSlate, useFocused, Slate } from "slate-react";
 import {
-  Editor,
-  Transforms,
-  Text,
-  Range,
-} from 'slate'
-import { css } from '@emotion/css'
-import { Button, Icon, Menu } from './EditorComponents'
+	Editor,
+	Transforms,
+	Range,
+	Element as SlateElement,
+} from "slate";
+import { withHistory } from "slate-history";
 import 'material-icons/iconfont/material-icons.css';
 
+import { Button, Icon, Menu } from "./EditorComponents";
+import { useRef } from "react";
+import { css } from '@emotion/css'
 
-const EditorComponent = ({initialValue, editor}) => {
-  return (
-    <Slate editor={editor} value={initialValue}>
-      <HoveringToolbar />
-      <Editable
-        renderLeaf={props => <Leaf {...props} />}
-        placeholder="Enter some text..."
-        onDOMBeforeInput={(event: InputEvent) => {
-          switch (event.inputType) {
-            case 'formatBold':
-              event.preventDefault()
-              return toggleFormat(editor, 'bold')
-            case 'formatItalic':
-              event.preventDefault()
-              return toggleFormat(editor, 'italic')
-            case 'formatUnderline':
-              event.preventDefault()
-              return toggleFormat(editor, 'underlined')
-          }
-        }}
-      />
-    </Slate>
-  )
-}
+const HOTKEYS = {
+	"mod+b": "bold",
+	"mod+i": "italic",
+	"mod+u": "underline",
+	"mod+`": "code",
+};
 
-const toggleFormat = (editor, format) => {
-  const isActive = isFormatActive(editor, format)
-  Transforms.setNodes(
-    editor,
-    { [format]: isActive ? null : true },
-    { match: Text.isText, split: true }
-  )
-}
+const LIST_TYPES = ["numbered-list", "bulleted-list"];
+const TEXT_ALIGN_TYPES = ["left", "center", "right"];
 
-const isFormatActive = (editor, format) => {
-  const [match] = Editor.nodes(editor, {
-    match: n => n[format] === true,
-    mode: 'all',
-  })
-  return !!match
-}
+const RichTextExample = ({editor, initialValue}) => {
+	const renderElement = useCallback((props) => <Element {...props} />, []);
+	const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+
+	return (
+		<Slate editor={editor} value={initialValue}>
+			<HoveringToolbar />
+			<Editable
+				renderElement={renderElement}
+				renderLeaf={renderLeaf}
+				placeholder="Enter some rich text…"
+				spellCheck
+				autoFocus
+				onKeyDown={(event) => {
+					for (const hotkey in HOTKEYS) {
+						if (isHotkey(hotkey, event as any)) {
+							event.preventDefault();
+							const mark = HOTKEYS[hotkey];
+							toggleMark(editor, mark);
+						}
+					}
+				}}
+			/>
+		</Slate>
+	);
+};
+
+const toggleBlock = (editor, format) => {
+	const isActive = isBlockActive(
+		editor,
+		format,
+		TEXT_ALIGN_TYPES.includes(format) ? "align" : "type"
+	);
+	const isList = LIST_TYPES.includes(format);
+
+	Transforms.unwrapNodes(editor, {
+		match: (n) =>
+			!Editor.isEditor(n) &&
+			SlateElement.isElement(n) &&
+			LIST_TYPES.includes(n.type) &&
+			!TEXT_ALIGN_TYPES.includes(format),
+		split: true,
+	});
+	let newProperties: Partial<SlateElement>;
+	if (TEXT_ALIGN_TYPES.includes(format)) {
+		newProperties = {
+			align: isActive ? undefined : format,
+		};
+	} else {
+		newProperties = {
+			type: isActive ? "paragraph" : isList ? "list-item" : format,
+		};
+	}
+	Transforms.setNodes<SlateElement>(editor, newProperties);
+
+	if (!isActive && isList) {
+		const block = { type: format, children: [] };
+		Transforms.wrapNodes(editor, block);
+	}
+};
+
+const toggleMark = (editor, format) => {
+	const isActive = isMarkActive(editor, format);
+
+	if (isActive) {
+		Editor.removeMark(editor, format);
+	} else {
+		Editor.addMark(editor, format, true);
+	}
+};
+
+const isBlockActive = (editor, format, blockType = "type") => {
+	const { selection } = editor;
+	if (!selection) return false;
+
+	const [match] = Array.from(
+		Editor.nodes(editor, {
+			at: Editor.unhangRange(editor, selection),
+			match: (n) =>
+				!Editor.isEditor(n) &&
+				SlateElement.isElement(n) &&
+				n[blockType] === format,
+		})
+	);
+
+	return !!match;
+};
+
+const isMarkActive = (editor, format) => {
+	const marks = Editor.marks(editor);
+	return marks ? marks[format] === true : false;
+};
+
+const Element = ({ attributes, children, element }) => {
+	const style = { textAlign: element.align };
+	switch (element.type) {
+		case "block-quote":
+			return (
+				<blockquote style={style} {...attributes}>
+					{children}
+				</blockquote>
+			);
+		case "bulleted-list":
+			return (
+				<ul style={style} {...attributes}>
+					{children}
+				</ul>
+			);
+		case "heading-one":
+			return (
+				<h1 style={style} {...attributes}>
+					{children}
+				</h1>
+			);
+		case "heading-two":
+			return (
+				<h2 style={style} {...attributes}>
+					{children}
+				</h2>
+			);
+		case "list-item":
+			return (
+				<li style={style} {...attributes}>
+					{children}
+				</li>
+			);
+		case "numbered-list":
+			return (
+				<ol style={style} {...attributes}>
+					{children}
+				</ol>
+			);
+		default:
+			return (
+				<p style={style} {...attributes}>
+					{children}
+				</p>
+			);
+	}
+};
 
 const Leaf = ({ attributes, children, leaf }) => {
-  if (leaf.bold) {
-    children = <strong>{children}</strong>
-  }
+	if (leaf.bold) {
+		children = <strong>{children}</strong>;
+	}
 
-  if (leaf.italic) {
-    children = <em>{children}</em>
-  }
+	if (leaf.code) {
+		children = <code>{children}</code>;
+	}
 
-  if (leaf.underlined) {
-    children = <u>{children}</u>
-  }
+	if (leaf.italic) {
+		children = <em>{children}</em>;
+	}
 
-  return <span {...attributes}>{children}</span>
-}
+	if (leaf.underline) {
+		children = <u>{children}</u>;
+	}
+
+	return <span {...attributes}>{children}</span>;
+};
+
+const BlockButton = ({ format, icon }) => {
+	const editor = useSlate();
+	return (
+		<Button
+			active={isBlockActive(
+				editor,
+				format,
+				TEXT_ALIGN_TYPES.includes(format) ? "align" : "type"
+			)}
+			onMouseDown={(event) => {
+				event.preventDefault();
+				toggleBlock(editor, format);
+			}}
+		>
+			<Icon>{icon}</Icon>
+		</Button>
+	);
+};
+
+const MarkButton = ({ format, icon }) => {
+	const editor = useSlate();
+	return (
+		<Button
+			active={isMarkActive(editor, format)}
+			onMouseDown={(event) => {
+				event.preventDefault();
+				toggleMark(editor, format);
+			}}
+		>
+			<Icon>{icon}</Icon>
+		</Button>
+	);
+};
 
 const HoveringToolbar = () => {
-  const toolbarRef = useRef<HTMLDivElement | null>()
-  const editor = useSlate()
-  const inFocus = useFocused()
+	const toolbarRef = useRef<HTMLDivElement | null>();
+	const editor = useSlate();
+	const inFocus = useFocused();
 
-  useEffect(() => {
-    const el = toolbarRef.current
-    const { selection } = editor
+	useEffect(() => {
+		const el = toolbarRef.current;
+		const { selection } = editor;
 
-    if (!el) {
-      return
-    }
+		if (!el) {
+			return;
+		}
 
-    if (
-      !selection ||
-      !inFocus ||
-      Range.isCollapsed(selection) ||
-      Editor.string(editor, selection) === ''
-    ) {
-      el.removeAttribute('style')
-      return
-    }
+		if (
+			!selection ||
+			!inFocus ||
+			Range.isCollapsed(selection) ||
+			Editor.string(editor, selection) === ""
+		) {
+			el.removeAttribute("style");
+			return;
+		}
 
-    const domSelection = window.getSelection()
-    const domRange = domSelection.getRangeAt(0)
-    const rect = domRange.getBoundingClientRect()
-    el.style.opacity = '1'
-    el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`
-    el.style.left = `${rect.left +
-      window.pageXOffset -
-      el.offsetWidth / 2 +
-      rect.width / 2}px`
-  })
+		const domSelection = window.getSelection();
+		const domRange = domSelection.getRangeAt(0);
+		const rect = domRange.getBoundingClientRect();
+		el.style.opacity = "1";
+		el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`;
+		el.style.left = `${
+			rect.left + window.pageXOffset - el.offsetWidth / 2 + rect.width / 2
+		}px`;
+	});
 
-  return (
-    ReactDOM.createPortal(
-      <Menu
-        ref={toolbarRef}
-        className={css`
-          padding: 8px 7px 6px;
-          position: absolute;
-          z-index: 11;
-          top: -10000px;
-          left: -10000px;
-          margin-top: -6px;
-          opacity: 0;
-          background-color: #222;
-          border-radius: 4px;
-          transition: opacity 0.75s;
-        `}
-        onMouseDown={e => {
-          // prevent toolbar from taking focus away from editor
-          e.preventDefault()
-        }}
-      >
-        <FormatButton format="bold" icon="format_bold" />
-        <FormatButton format="italic" icon="format_italic" />
-        <FormatButton format="underlined" icon="format_underlined" />
-      </Menu>
-    , document.getElementById('toolbar'))
-  )
-}
-
-const FormatButton = ({ format, icon }) => {
-  const editor = useSlate()
-  return (
-    <Button
-    reversed
-    active={isFormatActive(editor, format)}
-    onClick={() => toggleFormat(editor, format)}
-  >
-    <Icon>{icon}</Icon>
-  </Button>
-  )
-}
-
-
-export default EditorComponent
+	return ReactDOM.createPortal(
+		<Menu
+			ref={toolbarRef}
+			className={css`
+				padding: 8px 7px 6px;
+				position: absolute;
+				z-index: 11;
+				top: -10000px;
+				left: -10000px;
+				margin-top: -6px;
+				opacity: 0;
+				background-color: #222;
+				border-radius: 4px;
+				transition: opacity 0.75s;
+			`}
+			onMouseDown={(e) => {
+				// prevent toolbar from taking focus away from editor
+				e.preventDefault();
+			}}
+		>
+			<MarkButton format="bold" icon="format_bold" />
+			<MarkButton format="italic" icon="format_italic" />
+			<MarkButton format="underline" icon="format_underlined" />
+			<MarkButton format="code" icon="code" />
+			<BlockButton format="heading-one" icon="looks_one" />
+			<BlockButton format="heading-two" icon="looks_two" />
+			<BlockButton format="block-quote" icon="format_quote" />
+			<BlockButton format="numbered-list" icon="format_list_numbered" />
+			<BlockButton format="bulleted-list" icon="format_list_bulleted" />
+			<BlockButton format="left" icon="format_align_left" />
+			<BlockButton format="center" icon="format_align_center" />
+			<BlockButton format="right" icon="format_align_right" />
+		</Menu>,
+		document.getElementById("toolbar")
+	);
+};
+export default RichTextExample;

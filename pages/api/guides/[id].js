@@ -19,7 +19,9 @@ export default async (req, res) => {
 			break;
         case "PATCH":
 			try {
-				const guide = await Guide.findByIdAndUpdate(id, JSON.parse(req.body), { 
+				const guide = await Guide.findByIdAndUpdate(id, {
+                    title: req.body.title,
+                }, { 
                     new: true,
                     runValidators: true
                 });

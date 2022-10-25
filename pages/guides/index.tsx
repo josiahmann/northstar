@@ -4,6 +4,7 @@ import axios from "axios";
 import { Spinner } from "../../utils/utilityComponents";
 import Router from "next/router";
 import MainLayout from "../../components/mainLayout";
+import PageHeading from "../../components/pageHeading";
 
 function Guides() {
 	const [open, openModal] = useState(false);
@@ -88,36 +89,26 @@ function Guides() {
 
 	return (
 		<React.Fragment>
-			<header>
-				<div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 justify-between flex items-center">
-					<h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">
-						Guides
-					</h1>
-
-					<button onClick={() => openModal(true)} className="btn-primary">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							strokeWidth={1.5}
-							stroke="currentColor"
-							className="w-6 h-6 inline-block mr-2"
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								d="M12 6v12m6-6H6"
-							/>
-						</svg>
-						Create a Guide
-					</button>
-				</div>
-			</header>
-
-			<MainLayout>
-                {guides.length ? listGuides() : noGuidesFound()}
-            </MainLayout>
-				
+			<PageHeading title="Guides">
+				<button onClick={() => openModal(true)} className="btn-primary">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						strokeWidth={1.5}
+						stroke="currentColor"
+						className="w-6 h-6 inline-block mr-2"
+					>
+						<path
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							d="M12 6v12m6-6H6"
+						/>
+					</svg>
+					Create a Guide
+				</button>
+			</PageHeading>
+			<MainLayout>{guides.length ? listGuides() : noGuidesFound()}</MainLayout>
 
 			<Modal
 				ok={createGuide}

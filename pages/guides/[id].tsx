@@ -1,72 +1,59 @@
-import AdminLayout from "../../components/layouts/admin-layout";
 import MainLayout from "../../components/mainLayout";
-import { Guide } from "../../models/Guide";
 import { Spinner } from "../../utils/utilityComponents";
 import getStaticResourcePaths from "../../utils/getStaticResourcePaths";
-
-async function getData() {
-	let response = await fetch('/api/guides')
-    let data = await response.json()
-    const paths = data.data.map((guide: Guide) => {
-        return {
-            params: { id: guide._id },
-        }
-    })
-    return paths
+import PageHeading from "../../components/pageHeading";
+import React from "react";
+interface GuideInterface {
+	_id: "string";
+	title: "string";
+	steps: "array";
 }
- 
 
-function Guide({ guide, hasError }) {
-	// const { query } = useRouter();
-	// const [guide, setGuide] = useState(null);
-	// const [loading, setLoading] = useState(true);
-
-	// useEffect(() => {
-	// 	axios.get(`/api/guides/${query.id}`).then((res) => {
-	// 		setGuide(res.data.data);
-	// 		setLoading(false);
-	// 	});
-	// }, [query.id]);
-
+function GuidePage({
+	guide,
+	hasError,
+}: {
+	guide: GuideInterface;
+	hasError: boolean;
+}) {
 	if (hasError) {
 		return <Spinner />;
 	}
 
 	return (
-		<AdminLayout>
+		<React.Fragment>
+			<PageHeading title="Edit Guide"></PageHeading>
 			<MainLayout>
-				<h1>Guide: {guide.title}</h1>
-			</MainLayout>
-		</AdminLayout>
+                hi
+            </MainLayout>
+		</React.Fragment>
 	);
 }
 
-
-
-
 export const getStaticPaths = async () => {
-    const paths = await getStaticResourcePaths('guides');
-    return paths;
-}
-
-
+	const paths = await getStaticResourcePaths("guides");
+	return paths;
+};
 
 export const getStaticProps = async (context) => {
-    const guideId = context.params.id;    // Your dynamic page is [id].js
-    const server = "http://localhost:3000";
+	const guideId = context.params.id; // Your dynamic page is [id].js
+	const server = "http://localhost:3000";
 
-    // const res = await fetch(`${server}/api/entries/allStories/${id}`);
-    // trying to get the params._id from each story 
-    // single api call (here)
-    const res = await fetch(`${server}/api/guides`)
-        .then(res => res.json())
-        .then(data => data.data);
-    // removing const { data } because the data will be returned when calling res.json()
-    // instead of the calling the single api (just a fix not recommended to access [0] directly )
-    return {
-        props: { guide: res.filter(guide => guide._id === guideId)[0] }
-    }
-}
+	// const res = await fetch(`${server}/api/entries/allStories/${id}`);
+	// trying to get the params._id from each story
+	// single api call (here)
+	const res = await fetch(`${server}/api/guides`)
+		.then((res) => res.json())
+		.then((data) => data.data);
+	// removing const { data } because the data will be returned when calling res.json()
+	// instead of the calling the single api (just a fix not recommended to access [0] directly )
+	return {
+		props: {
+			guide: res.filter((guide: GuideInterface) => guide._id === guideId)[0],
+		},
+	};
+};
 
+GuidePage.layout = "admin";
 
-export default Guide;
+export default GuidePage;

@@ -1,13 +1,15 @@
 import "quill/dist/quill.bubble.css";
 import ModalStep from "./ModalStep";
+import EditorComponent from "./EditorComponent";
 import apiClient from "../../utils/http-common";
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { createEditor } from 'slate'
 // Import the Slate components and React plugin.
-import { Slate, Editable, withReact } from 'slate-react'
+import { withReact } from 'slate-react'
+import { withHistory } from 'slate-history'
 
 function EditStep({ _id, title, content, onClose, fetchSteps }) {
-    const [editor] = useState(() => withReact(createEditor()))
+    const editor = useMemo(() => withHistory(withReact(createEditor())), [])
     const initialValue = content ? content : [
         {
             type: 'paragraph',
@@ -15,8 +17,12 @@ function EditStep({ _id, title, content, onClose, fetchSteps }) {
         },
     ]
 
+    function handleChange(value) {
+        console.log(value)
+        console.log('here')
+    }
+
 	const onSave = async () => {
-        console.log(editor.children);
 		try {
 			if (!_id) {
 				return apiClient.post("/steps", {
@@ -42,9 +48,7 @@ function EditStep({ _id, title, content, onClose, fetchSteps }) {
 
 	return (
 		<ModalStep onSave={handleSave} onClose={onClose} title={title}>
-            <Slate editor={editor} value={initialValue}>
-                <Editable/>
-            </Slate>
+            <EditorComponent editor={editor} emitValue={handleChange} initialValue={initialValue}></EditorComponent>
 		</ModalStep>
 	);
 }

@@ -1,9 +1,12 @@
-import Layout from '../layout'
+import HeaderComponent from "./header";
 
 export default function AdminLayout({ children }) {
   return (
-    <Layout>
-      {children}
-    </Layout>
+    <div className="min-h-full">
+        <HeaderComponent></HeaderComponent>
+        <div className="py-10">			
+            {children}
+        </div>
+    </div>
   )
 }

@@ -4,6 +4,7 @@ import getStaticResourcePaths from "../../utils/getStaticResourcePaths";
 import PageHeading from "../../components/pageHeading";
 import React, { useRef, useState } from "react";
 import axios from "axios";
+import ActionsLayout from "../../components/ActionsLayout";
 interface GuideInterface {
 	_id: "string";
 	title: "string";
@@ -39,7 +40,6 @@ function GuidePage({
 	return (
 		<React.Fragment>
 			<PageHeading title="Edit Guide">
-                <button className="btn btn-primary" onClick={saveGuide}>Save</button>
             </PageHeading>
 			<MainLayout>
 				<div>
@@ -61,6 +61,11 @@ function GuidePage({
 						/>
 					</div>
 				</div>
+
+                <ActionsLayout>
+                    <button className="btn-primary" onClick={saveGuide}>Save</button>
+
+                </ActionsLayout>
 			</MainLayout>
 		</React.Fragment>
 	);

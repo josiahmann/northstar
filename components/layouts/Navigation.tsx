@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -15,9 +15,9 @@ const navigation = [
 	{ name: "Guides", path: "/guides" },
 ];
 const userNavigation = [
-	{ name: "Your Profile", path: "#" },
-	{ name: "Settings", path: "#" },
-	{ name: "Sign out", path: "#" },
+	{ name: "Your Profile", path: "/profile" },
+	{ name: "Settings", path: "/" },
+	{ name: "Sign out", path: "/" },
 ];
 
 function classNames(...classes: string[]) {
@@ -25,14 +25,18 @@ function classNames(...classes: string[]) {
 }
 
 function HeaderComponent() {
-    const router = useRouter();
+	const router = useRouter();
+	const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+    const menuButtonRef = useRef(null);
+	
 	return (
 		<Disclosure as="nav" className="bg-white shadow-sm">
 			{({ open }) => (
 				<>
 					<div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 						<div className="flex h-16 justify-between">
-							<div className="flex">
+							{/* Logo and top left nav */}
+                            <div className="flex">
 								<div className="flex flex-shrink-0 items-center">
 									<img
 										className="block h-8 w-auto lg:hidden"
@@ -47,10 +51,7 @@ function HeaderComponent() {
 								</div>
 								<div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
 									{navigation.map((item) => (
-										<Link
-											href={item.path}
-                                            key={item.name}
-										>
+										<Link href={item.path} key={item.name}>
 											<a
 												className={classNames(
 													router.pathname === item.path
@@ -65,7 +66,9 @@ function HeaderComponent() {
 									))}
 								</div>
 							</div>
-							<div className="hidden sm:ml-6 sm:flex sm:items-center">
+							
+                            {/* Profile and Notifications */}
+                            <div className="hidden sm:ml-6 sm:flex sm:items-center">
 								<button
 									type="button"
 									className="rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -75,48 +78,57 @@ function HeaderComponent() {
 								</button>
 
 								{/* Profile dropdown */}
+                                
 								<Menu as="div" className="relative ml-3">
-									<div>
-										<Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-											<span className="sr-only">Open user menu</span>
-											<img
-												className="h-8 w-8 rounded-full"
-												src={user.imageUrl}
-												alt=""
-											/>
-										</Menu.Button>
-									</div>
-									<Transition
-										as={Fragment}
-										enter="transition ease-out duration-200"
-										enterFrom="transform opacity-0 scale-95"
-										enterTo="transform opacity-100 scale-100"
-										leave="transition ease-in duration-75"
-										leaveFrom="transform opacity-100 scale-100"
-										leaveTo="transform opacity-0 scale-95"
-									>
-										<Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-											{userNavigation.map((item) => (
-												<Menu.Item key={item.name}>
-													{({ active }) => (
-														<a
-															href="#"
-															onClick={(e) => {
-																e.preventDefault();
-																Router.push(item.path);
-															}}
-															className={classNames(
-																router.pathname === item.path ? "bg-gray-100" : "",
-																"block px-4 py-2 text-sm text-gray-700"
-															)}
-														>
-															{item.name}
-														</a>
-													)}
-												</Menu.Item>
-											))}
-										</Menu.Items>
-									</Transition>
+									{({ open }) => (
+										<>
+											<div>
+												<Menu.Button onClick={()=> setIsProfileMenuOpen(true)} ref={menuButtonRef} className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+													<span className="sr-only">Open user menu</span>
+													<img
+														className="h-8 w-8 rounded-full"
+														src={user.imageUrl}
+														alt=""
+													/>
+												</Menu.Button>
+											</div>
+
+											{isProfileMenuOpen  && (
+												<Transition
+													as={Fragment}
+													enter="transition ease-out duration-200"
+													enterFrom="transform opacity-0 scale-95"
+													enterTo="transform opacity-100 scale-100"
+													leave="transition ease-in duration-75"
+													leaveFrom="transform opacity-100 scale-100"
+													leaveTo="transform opacity-0 scale-95"
+												>
+													<Menu.Items
+														className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+													>
+														{userNavigation.map((item) => (
+															<Menu.Item key={item.name}>
+																{({ active }) => (
+																	<Link href={item.path}>
+																		<a
+																			className={classNames(
+																				router.pathname === item.path
+																					? "bg-gray-100"
+																					: "",
+																				"block px-4 py-2 text-sm text-gray-700"
+																			)}
+																		>
+																			{item.name}
+																		</a>
+																	</Link>
+																)}
+															</Menu.Item>
+														))}
+													</Menu.Items>
+												</Transition>
+											)}
+										</>
+									)}
 								</Menu>
 							</div>
 							<div className="-mr-2 flex items-center sm:hidden">

@@ -72,7 +72,7 @@ function Guides() {
 			<ul>
 				{guides.map((guide: any) => (
 					<li
-						onClick={() => Router.push("/app/guides/" + guide._id)}
+						onClick={() => Router.push("/guides/" + guide._id)}
 						key={guide._id}
 						className="curser-pointer border-t-0 border-b p-3"
 					>

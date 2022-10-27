@@ -1,6 +1,7 @@
 import HeaderComponent from "./Navigation";
 
 export default function AdminLayout({ children }) {
+    
   return (
     <div className="min-h-full">
         <HeaderComponent></HeaderComponent>

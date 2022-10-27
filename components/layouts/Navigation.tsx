@@ -1,9 +1,9 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Disclosure, Menu, Transition } from "@headlessui/react";
+import { useSession, signIn, signOut } from "next-auth/react"
+import { Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import Router, { useRouter } from "next/router";
-import { useLocation } from "react-router-dom";
+import { useRouter } from "next/router";
 
 const userData = {
 	name: "Tom Cook",
@@ -17,8 +17,7 @@ const navigation = [
 ];
 const userNavigation = [
 	{ name: "Your Profile", path: "/profile" },
-	{ name: "Settings", path: "/" },
-	{ name: "Sign out", path: "/" },
+	{ name: "Settings", path: "/settings" },
 ];
 
 function classNames(...classes: string[]) {
@@ -26,12 +25,12 @@ function classNames(...classes: string[]) {
 }
 
 function HeaderComponent() {
-	const router = useRouter();
+    const { data: session } = useSession()
+    const router = useRouter();
 	const [user, setUser] = useState(userData);
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 	const menuRef = useRef(null);
-
 
     const handleClickOutside = (event: Event) => {
         if (menuRef.current && !menuRef?.current.contains(event.target)) {
@@ -129,6 +128,14 @@ function HeaderComponent() {
 												</a>
 											</Link>
 										))}
+                                        
+                                            <div
+                                                onClick={(e) => {
+                                                    e.preventDefault(); signOut({ callbackUrl: "/login" });
+                                                }}
+                                                className="block px-4 py-2 text-sm text-gray-700">
+                                                Sign Out
+                                            </div>
 									</div>
 								</Transition>
 							)}

@@ -1,5 +1,6 @@
 import dbConnect from "../../../utils/dbConnect";
 import Guide from "../../../models/Guide";
+import { unstable_getServerSession } from "next-auth/next"
 
 dbConnect();
 
@@ -8,6 +9,8 @@ export default async (req, res) => {
 		query: { id },
 		method,
 	} = req;
+
+    
 	switch (method) {
         case "GET":
 			try {
